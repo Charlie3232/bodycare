@@ -299,7 +299,7 @@ select:focus{border-color:var(--rose-deep);}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyVeb7NU5QlKgh0ckBXF0rdsHsv4N9-JNvIo8Fr2Gsrry8XsDp6Gh6YAOzmOiAACsNI/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwLscbEn4sf4xCEGQMt4WudeIrQKZDcXmaiVusl10V-1FPyowX4pueHeFSmGHofegib/exec";
 const ADMIN_PW = "1332";
 const RADAR_COLORS = ['#9E6373','#B5946A','#9DA68F','#7A8FA8','#C99BA4','#A0886A'];
 const RADAR_FILLS = ['rgba(158,99,115,0.15)','rgba(181,148,106,0.12)','rgba(157,166,143,0.15)','rgba(122,143,168,0.12)','rgba(201,155,164,0.12)','rgba(160,136,106,0.12)'];
@@ -434,7 +434,11 @@ function openAddFromClinic(clinicName){
 
 /* ── API ── */
 async function post(payload){
-  const res=await fetch(GAS_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({...payload,password:ADMIN_PW})});
+  const data = {...payload, password: ADMIN_PW};
+  // 用 FormData 送，避免 GAS redirect 把 POST 變 GET 吃掉 postData
+  const form = new FormData();
+  form.append("payload", JSON.stringify(data));
+  const res = await fetch(GAS_URL, {method:"POST", body: form});
   return res.json();
 }
 async function save(){
