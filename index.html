@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>醫美療程評比</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Serif+TC:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E7DFDB;--surface:#FBF7F5;--card:#fff;
+  --rose-deep:#9E6373;--rose-soft:#D8B5BC;--rose-pale:#F0DEE2;
+  --sage-soft:#DDE0D2;--brass:#B5946A;--brass-deep:#9c7c4f;
+  --ink:#4A3F42;--muted:#9A8B8E;--hair:#E3D3D7;--danger:#B5736E;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Huninn',system-ui,sans-serif;line-height:1.6;min-height:100vh;}
+.app{max-width:480px;margin:0 auto;padding:20px 16px 80px;}
+.serif{font-family:'Noto Serif TC',serif;}
+.hidden{display:none !important;}
+
+.eyebrow{font-size:12px;letter-spacing:6px;color:var(--brass);margin:0 0 2px;}
+h1{font-size:27px;margin:0 0 4px;font-weight:500;letter-spacing:2px;}
+h1 .hl{color:var(--rose-deep);}
+.sub{font-size:13px;color:var(--muted);margin:0 0 20px;}
+
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.tab{font-size:14px;padding:8px 18px;border-radius:22px;cursor:pointer;border:0.5px solid var(--hair);color:var(--muted);background:transparent;font-family:inherit;transition:.2s;}
+.tab.on{background:var(--rose-deep);color:#fff;border-color:var(--rose-deep);}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px;}
+.chip{font-size:15px;padding:10px 20px;border-radius:20px;cursor:pointer;border:none;font-family:inherit;transition:transform .15s;}
+.chip:active{transform:scale(.95);}
+.chip .cnt{font-size:12px;opacity:.7;margin-left:6px;}
+
+.clinic-row{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:0.5px solid var(--hair);border-radius:18px;padding:14px 18px;margin-bottom:11px;cursor:pointer;transition:transform .15s;}
+.clinic-row:active{transform:scale(.98);}
+.clinic-row .nm{font-size:16px;}
+.clinic-row .meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.clinic-row .arr{color:var(--rose-soft);font-size:22px;line-height:1;}
+
+.panel{background:var(--surface);border-radius:22px;padding:22px 18px;margin-top:4px;}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);cursor:pointer;margin-bottom:14px;}
+.back:active{color:var(--rose-deep);}
+
+/* 比價尺 */
+.ph-title{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+.ph-title .t{font-size:21px;font-weight:500;}
+.ph-title .hint{font-size:12px;color:var(--muted);}
+.sortbar{display:flex;gap:8px;margin:14px 0 20px;flex-wrap:wrap;}
+.sortbtn{flex:1;min-width:80px;font-size:13px;padding:8px;border-radius:14px;cursor:pointer;background:transparent;border:0.5px solid var(--hair);color:var(--muted);font-family:inherit;transition:.2s;}
+.sortbtn.on{background:var(--rose-pale);color:var(--rose-deep);border-color:var(--rose-pale);}
+.rule{margin-bottom:20px;}
+.rule .rhead{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;}
+.rule .rnm{font-size:15px;color:var(--ink);}
+.rule .badge{font-size:11px;color:#fff;background:var(--brass);padding:2px 10px;border-radius:12px;margin-left:6px;vertical-align:1px;}
+.rule .rmc{font-size:11px;color:var(--muted);}
+.rule .barwrap{display:flex;align-items:center;gap:10px;}
+.bar{height:30px;border-radius:0 15px 15px 0;background:var(--rose-soft);transition:width .8s cubic-bezier(.2,.8,.2,1);min-width:24px;}
+.bar.low{background:var(--brass);}
+.rule .rprice{font-size:17px;color:var(--rose-deep);white-space:nowrap;}
+.rule .rprice.low{color:var(--brass-deep);}
+.rule .rnote{font-size:12px;color:var(--muted);margin-top:5px;}
+
+/* 診所詳情 */
+.clinic-head .cnm{font-size:21px;font-weight:500;}
+.clinic-head .cloc{font-size:13px;color:var(--muted);margin-top:2px;margin-bottom:16px;}
+.treat-card{background:var(--card);border:0.5px solid var(--hair);border-radius:16px;padding:14px 16px;margin-bottom:11px;}
+.treat-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.treat-card .tn{font-size:16px;}
+.treat-card .tm{font-size:11px;color:var(--muted);}
+.treat-card .tnote{font-size:12px;color:var(--muted);margin:0 0 9px;}
+.prices{display:flex;gap:14px;flex-wrap:wrap;}
+.prices .pitem .lab{font-size:11px;color:var(--muted);margin:0;}
+.prices .pitem .val{font-size:15px;margin:2px 0 0;}
+.prices .pitem .val.avg{color:var(--rose-deep);}
+.star-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--hair);}
+.star-item .slab{font-size:11px;color:var(--muted);margin:0 0 2px;}
+.star-item .stars{color:#B5946A;font-size:14px;letter-spacing:1px;}
+
+/* 新增/編輯表單 */
+.add-btn-wrap{margin-bottom:16px;}
+.add-toggle{width:100%;font-size:15px;padding:13px;border-radius:16px;cursor:pointer;font-family:inherit;background:var(--rose-deep);color:#fff;border:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s;}
+.add-toggle:active{transform:scale(.98);}
+.form-panel{background:var(--surface);border-radius:20px;padding:20px 18px;margin-bottom:16px;}
+.form-banner{font-size:13px;color:var(--brass);margin-bottom:10px;min-height:18px;}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;}
+.input-wrap{position:relative;}
+input{width:100%;font-family:inherit;font-size:15px;padding:10px 12px;border:0.5px solid var(--hair);border-radius:12px;background:var(--card);color:var(--ink);outline:none;}
+input:focus{border-color:var(--rose-deep);}
+input[readonly]{background:var(--bg);color:var(--muted);}
+.dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card);border:0.5px solid var(--hair);border-radius:12px;z-index:100;max-height:160px;overflow-y:auto;margin-top:2px;}
+.dropdown div{padding:9px 12px;font-size:14px;cursor:pointer;color:var(--ink);}
+.dropdown div:hover{background:var(--rose-pale);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.avg-hint{font-size:12px;color:var(--brass);margin:8px 0 0;}
+
+/* 星星評分輸入 */
+.star-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.star-input-item label{margin:0 0 4px;}
+.star-picker{display:flex;gap:4px;}
+.star-picker span{font-size:22px;cursor:pointer;color:#D8C4C8;transition:color .1s;line-height:1;}
+.star-picker span.on{color:#B5946A;}
+
+.btn-save{width:100%;background:var(--rose-deep);color:#fff;font-size:15px;padding:13px;border-radius:14px;margin-top:16px;font-family:inherit;border:none;cursor:pointer;transition:.15s;}
+.btn-save:active{transform:scale(.97);}
+.btn-cancel{width:100%;background:transparent;border:0.5px solid var(--hair);color:var(--muted);font-size:14px;padding:11px;border-radius:14px;margin-top:8px;font-family:inherit;cursor:pointer;}
+
+/* 管理 */
+.mgmt-list{margin-top:4px;}
+.mgmt-title{font-size:13px;color:var(--muted);margin:0 0 10px;}
+.mgmt-row{background:var(--surface);border:0.5px solid var(--hair);border-radius:14px;padding:12px 14px;margin-bottom:9px;}
+.mgmt-row .mr-nm{font-size:14px;color:var(--ink);}
+.mgmt-row .mr-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.mgmt-row .mr-acts{display:flex;gap:6px;margin-top:8px;}
+.mgmt-row button{font-family:inherit;font-size:12px;padding:5px 12px;border-radius:10px;border:none;cursor:pointer;}
+.btn-edit{background:var(--sage-soft);color:#5f6651;}
+.btn-del{background:#F3E0DE;color:var(--danger);}
+
+/* 雷達圖頁 */
+.radar-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.rpill{font-size:13px;padding:7px 16px;border-radius:20px;cursor:pointer;border:0.5px solid var(--hair);color:var(--muted);background:transparent;font-family:inherit;transition:.2s;}
+.rpill.on{background:var(--rose-deep);color:#fff;border-color:var(--rose-deep);}
+.radar-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+.rleg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);}
+.rleg-dot{width:10px;height:10px;border-radius:50%;}
+
+/* 價格估算 */
+.calc-box{background:var(--card);border:0.5px solid var(--hair);border-radius:16px;padding:16px;margin-top:16px;}
+.calc-box .cbtitle{font-size:14px;font-weight:500;color:var(--ink);margin:0 0 12px;}
+select{width:100%;font-family:inherit;font-size:15px;padding:10px 12px;border:0.5px solid var(--hair);border-radius:12px;background:var(--card);color:var(--ink);outline:none;margin-bottom:10px;}
+select:focus{border-color:var(--rose-deep);}
+.calc-result{background:var(--rose-pale);border-radius:12px;padding:12px 14px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;}
+.calc-result .crl{font-size:13px;color:var(--muted);}
+.calc-result .crv{font-size:20px;font-weight:500;color:var(--rose-deep);}
+
+.empty{text-align:center;color:var(--muted);font-size:14px;padding:30px 10px;}
+.state{text-align:center;padding:40px 10px;color:var(--muted);font-size:14px;}
+.footer{text-align:center;font-size:11px;color:var(--muted);margin-top:28px;line-height:1.8;}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:10px 22px;border-radius:30px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:999;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- 主頁 -->
+<section id="view-home">
+  <p class="eyebrow serif">CLINIC COMPARE</p>
+  <h1 class="serif">醫美療程<span class="hl">評比</span></h1>
+  <p class="sub">挑一個療程，找到最值得的選擇</p>
+
+  <div class="add-btn-wrap">
+    <button class="add-toggle" onclick="toggleForm()">
+      <span id="form-icon">＋</span> 新增療程報價
+    </button>
+  </div>
+
+  <div class="form-panel hidden" id="form-panel">
+    <div class="form-banner" id="form-banner"></div>
+    <div class="grid2">
+      <div>
+        <label>診所名稱 *</label>
+        <div class="input-wrap">
+          <input id="f-clinic" autocomplete="off" oninput="suggest('f-clinic','clinic-dd',getMemory('clinics'))" onfocus="suggest('f-clinic','clinic-dd',getMemory('clinics'))" onblur="hideDd('clinic-dd')">
+          <div class="dropdown hidden" id="clinic-dd"></div>
+        </div>
+      </div>
+      <div><label>地區</label><input id="f-area" placeholder="台北 / 新竹…"></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <label>療程 *</label>
+        <div class="input-wrap">
+          <input id="f-treatment" autocomplete="off" placeholder="皮秒雷射" oninput="suggest('f-treatment','treat-dd',getMemory('treatments'))" onfocus="suggest('f-treatment','treat-dd',getMemory('treatments'))" onblur="hideDd('treat-dd')">
+          <div class="dropdown hidden" id="treat-dd"></div>
+        </div>
+      </div>
+      <div>
+        <label>機台</label>
+        <div class="input-wrap">
+          <input id="f-machine" autocomplete="off" placeholder="PicoSure" oninput="suggest('f-machine','machine-dd',getMemory('machines'))" onfocus="suggest('f-machine','machine-dd',getMemory('machines'))" onblur="hideDd('machine-dd')">
+          <div class="dropdown hidden" id="machine-dd"></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div><label>單堂體驗價 *</label><input id="f-single" type="number" oninput="updAvg()"></div>
+      <div><label>多堂總價</label><input id="f-multi" type="number" oninput="updAvg()"></div>
+    </div>
+    <div class="grid2">
+      <div><label>堂數</label><input id="f-times" type="number" placeholder="例：5" oninput="updAvg()"></div>
+      <div><label>備註</label><input id="f-note"></div>
+    </div>
+    <p class="avg-hint" id="avg-hint">多堂均價自動計算（多堂 ÷ 堂數）</p>
+
+    <label style="margin-top:16px;">評分</label>
+    <div class="star-inputs">
+      <div class="star-input-item"><label>好約程度</label><div class="star-picker" id="sp-book" data-key="book"></div></div>
+      <div class="star-input-item"><label>尊榮感</label><div class="star-picker" id="sp-vip" data-key="vip"></div></div>
+      <div class="star-input-item"><label>距離方便</label><div class="star-picker" id="sp-dist" data-key="dist"></div></div>
+      <div class="star-input-item"><label>人員親切度</label><div class="star-picker" id="sp-staff" data-key="staff"></div></div>
+    </div>
+
+    <button class="btn-save" id="save-btn" onclick="save()">新增</button>
+    <button class="btn-cancel hidden" id="cancel-btn" onclick="resetForm()">取消編輯</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" id="tab-treat" onclick="setMode('treat')">按療程</button>
+    <button class="tab" id="tab-clinic" onclick="setMode('clinic')">按診所</button>
+    <button class="tab" id="tab-radar" onclick="setMode('radar')">雷達評比</button>
+    <button class="tab" id="tab-mgmt" onclick="setMode('mgmt')">管理</button>
+  </div>
+
+  <div id="home-body"><div class="state">載入中…</div></div>
+</section>
+
+<!-- 比價尺 -->
+<section id="view-compare" class="hidden">
+  <div class="back" onclick="goHome()">← 回主頁</div>
+  <div class="panel">
+    <div class="ph-title">
+      <span class="t serif" id="cmp-title"></span>
+      <span class="hint">短桿較便宜</span>
+    </div>
+    <div class="sortbar">
+      <button class="sortbtn on" id="srt-avg" onclick="setSort('avg')">依均價</button>
+      <button class="sortbtn" id="srt-single" onclick="setSort('single')">依單堂體驗價</button>
+    </div>
+    <div id="ruler"></div>
+  </div>
+</section>
+
+<!-- 診所詳情 -->
+<section id="view-clinic" class="hidden">
+  <div class="back" onclick="goHome()">← 回主頁</div>
+  <div class="panel">
+    <div class="clinic-head">
+      <div class="cnm serif" id="cl-name"></div>
+      <div class="cloc" id="cl-loc"></div>
+    </div>
+    <div id="cl-treats"></div>
+  </div>
+</section>
+
+<!-- 雷達評比頁 -->
+<section id="view-radar" class="hidden">
+  <div class="back" onclick="goHome()">← 回主頁</div>
+  <div class="panel">
+    <div class="ph-title" style="margin-bottom:4px;">
+      <span class="t serif" id="radar-title">雷達評比</span>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">選療程 → 選診所比較（最多3家）</p>
+
+    <label>療程</label>
+    <select id="radar-treat-sel" onchange="onRadarTreatChange()"></select>
+
+    <div class="radar-pills" id="radar-pills"></div>
+
+    <div style="position:relative;width:100%;height:300px;">
+      <canvas id="radar-chart" role="img" aria-label="診所多維度雷達評比圖">請使用支援Canvas的瀏覽器</canvas>
+    </div>
+    <div class="radar-legend" id="radar-legend"></div>
+
+    <!-- 價格估算購物車 -->
+    <div class="calc-box">
+      <p class="cbtitle">💰 療程費用試算</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 12px;">選擇多個療程方案，計算總費用</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><label style="margin-top:0;">療程</label><select id="calc-treat-sel" onchange="onCalcTreatChange()"></select></div>
+        <div><label style="margin-top:0;">診所</label><select id="calc-clinic-sel" onchange="onCalcClinicChange()"></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+        <div><label>方案</label><select id="calc-plan-sel"></select></div>
+        <div><label>堂數</label><input id="calc-times" type="number" min="1" placeholder="堂數" style="margin-bottom:0;"></div>
+      </div>
+      <button onclick="addToCart()" style="width:100%;margin-top:10px;padding:10px;border-radius:14px;border:1.5px dashed var(--rose-soft);background:transparent;color:var(--rose-deep);font-size:14px;font-family:inherit;cursor:pointer;">＋ 加入試算清單</button>
+      <div id="cart-list" style="margin-top:12px;"></div>
+      <div id="cart-total-box" class="hidden" style="background:var(--rose-pale);border-radius:14px;padding:14px 16px;margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:14px;color:var(--muted);">試算總費用</span>
+          <span style="font-size:22px;font-weight:500;color:var(--rose-deep);" id="cart-grand-total"></span>
+        </div>
+        <div id="cart-summary" style="font-size:12px;color:var(--muted);line-height:1.8;"></div>
+        <button onclick="clearCart()" style="margin-top:10px;font-size:12px;padding:6px 14px;border-radius:10px;border:0.5px solid var(--hair);background:transparent;color:var(--muted);font-family:inherit;cursor:pointer;">清空清單</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="footer">
+  本站價格為使用者整理分享，僅供參考<br>
+  實際費用以各院所現場諮詢為準，醫療行為請與醫師討論後決定
+</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzZf0naXs_C4ESW663Jlva3N6N63pGFatfquMtIR-TyJZCtySoYd9OStYd1a23F2lWg/exec";
+const ADMIN_PW = "1332";
+const RADAR_COLORS = ['#9E6373','#B5946A','#9DA68F','#7A8FA8','#C99BA4','#A0886A'];
+const RADAR_FILLS = ['rgba(158,99,115,0.15)','rgba(181,148,106,0.12)','rgba(157,166,143,0.15)','rgba(122,143,168,0.12)','rgba(201,155,164,0.12)','rgba(160,136,106,0.12)'];
+
+let DATA = [];
+let mode = 'treat';
+let editRow = null;
+let formOpen = false;
+let sortKey = 'avg';
+let curTreatment = null;
+let fromClinic = null;
+let radarActive = [];
+let radarTreat = '';
+let _radarChart = null;
+
+const $ = id => document.getElementById(id);
+const fmt = n => "$" + Number(n||0).toLocaleString();
+const avgOf = r => r.times > 0 ? Math.round(r.multi / r.times) : (r.multi||0);
+const esc = s => String(s).replace(/'/g,"\\'");
+const stars = n => '★'.repeat(n||0) + '☆'.repeat(5-(n||0));
+
+/* ── 記憶下拉 ── */
+function getMemory(key){ return JSON.parse(localStorage.getItem('mem_'+key)||'[]'); }
+function saveMemory(key,val){
+  if(!val) return;
+  let arr = getMemory(key);
+  arr = [val,...arr.filter(x=>x!==val)].slice(0,30);
+  localStorage.setItem('mem_'+key, JSON.stringify(arr));
+}
+function suggest(inputId, ddId, list){
+  const v = $(inputId).value.trim().toLowerCase();
+  const filtered = v ? list.filter(x=>x.toLowerCase().includes(v)) : list;
+  const dd = $(ddId);
+  if(!filtered.length){ dd.classList.add('hidden'); return; }
+  dd.innerHTML = filtered.map(x=>`<div onmousedown="pick('${inputId}','${ddId}','${esc(x)}')">${x}</div>`).join('');
+  dd.classList.remove('hidden');
+}
+function pick(inputId, ddId, val){
+  $(inputId).value = val;
+  $(ddId).classList.add('hidden');
+  if(inputId==='f-multi'||inputId==='f-times') updAvg();
+}
+function hideDd(ddId){ setTimeout(()=>$(ddId).classList.add('hidden'),150); }
+
+/* ── 星星選擇器 ── */
+const starVals = {book:0, vip:0, dist:0, staff:0};
+function initStarPickers(){
+  ['book','vip','dist','staff'].forEach(key=>{
+    const el = document.getElementById('sp-'+key);
+    el.innerHTML = [1,2,3,4,5].map(i=>`<span data-v="${i}">★</span>`).join('');
+    el.querySelectorAll('span').forEach(s=>{
+      s.addEventListener('click',()=>{ starVals[key]=+s.dataset.v; renderStars(key); });
+    });
+    renderStars(key);
+  });
+}
+function renderStars(key){
+  const el = document.getElementById('sp-'+key);
+  el.querySelectorAll('span').forEach(s=>s.classList.toggle('on',+s.dataset.v<=starVals[key]));
+}
+function setStars(key,val){
+  starVals[key]=val||0;
+  renderStars(key);
+}
+
+/* ── Toast ── */
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+/* ── 載入 ── */
+async function load(){
+  try{
+    const res = await fetch(GAS_URL+"?action=list");
+    DATA = await res.json();
+    if(!Array.isArray(DATA)) DATA=[];
+  }catch(e){
+    $("home-body").innerHTML='<div class="state">連線失敗，請稍後再試</div>';
+    return;
+  }
+  renderHome();
+}
+
+/* ── 表單 ── */
+function toggleForm(){
+  formOpen=!formOpen;
+  $("form-panel").classList.toggle('hidden',!formOpen);
+  $("form-icon").textContent=formOpen?'✕':'＋';
+}
+function updAvg(){
+  const m=+$("f-multi").value, t=+$("f-times").value;
+  $("avg-hint").textContent=(m>0&&t>0)?`多堂均價：${fmt(Math.round(m/t))}（${t}堂）`:"多堂均價自動計算（多堂 ÷ 堂數）";
+}
+function resetForm(){
+  editRow=null; fromClinic=null;
+  ['f-clinic','f-area','f-treatment','f-machine','f-single','f-multi','f-times','f-note'].forEach(i=>$(i).value='');
+  $("f-clinic").readOnly=false; $("f-clinic").style.background=''; $("f-clinic").style.color='';
+  $("save-btn").textContent="新增";
+  $("cancel-btn").classList.add('hidden');
+  $("form-banner").textContent='';
+  Object.keys(starVals).forEach(k=>setStars(k,0));
+  updAvg();
+}
+function startEdit(row){
+  const r=DATA.find(x=>x.row===row); if(!r) return;
+  editRow=row;
+  $("f-clinic").value=r.clinic; $("f-area").value=r.area||'';
+  $("f-treatment").value=r.treatment; $("f-machine").value=r.machine||'';
+  $("f-single").value=r.single; $("f-multi").value=r.multi;
+  $("f-times").value=r.times||''; $("f-note").value=r.note||'';
+  setStars('book',r.s_book); setStars('vip',r.s_vip);
+  setStars('dist',r.s_dist); setStars('staff',r.s_staff);
+  $("save-btn").textContent="儲存修改";
+  $("cancel-btn").classList.remove('hidden');
+  $("form-banner").textContent=`正在編輯：${r.clinic} · ${r.treatment}`;
+  updAvg();
+  if(!formOpen) toggleForm();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function openAddFromClinic(clinicName){
+  fromClinic=clinicName; resetForm();
+  $("f-clinic").value=clinicName;
+  $("f-clinic").readOnly=true;
+  $("f-clinic").style.background='var(--bg)';
+  $("f-clinic").style.color='var(--muted)';
+  $("form-banner").textContent=`新增療程到：${clinicName}`;
+  show('view-home');
+  if(!formOpen) toggleForm();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── API ── */
+async function post(payload){
+  const res=await fetch(GAS_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({...payload,password:ADMIN_PW})});
+  return res.json();
+}
+async function save(){
+  const p={
+    action:editRow?"update":"add", row:editRow,
+    clinic:$("f-clinic").value.trim(), area:$("f-area").value.trim(),
+    treatment:$("f-treatment").value.trim(), machine:$("f-machine").value.trim(),
+    single:+$("f-single").value||0, multi:+$("f-multi").value||0,
+    times:+$("f-times").value||0, note:$("f-note").value.trim(),
+    s_book:starVals.book, s_vip:starVals.vip, s_dist:starVals.dist, s_staff:starVals.staff
+  };
+  if(!p.clinic||!p.treatment||!p.single){toast("診所、療程、單堂體驗價為必填");return;}
+  $("save-btn").disabled=true;
+  try{
+    const r=await post(p);
+    if(r.success){
+      toast(editRow?"已更新":"已新增");
+      saveMemory('clinics',p.clinic); saveMemory('treatments',p.treatment); saveMemory('machines',p.machine);
+      const back=fromClinic;
+      resetForm(); formOpen=true; toggleForm();
+      await load();
+      if(back) openClinic(back);
+    } else toast(r.error||"操作失敗");
+  }catch(e){toast("連線失敗");}
+  $("save-btn").disabled=false;
+}
+async function del(row){
+  if(!confirm("確定刪除這筆資料？")) return;
+  try{
+    const r=await post({action:"delete",row});
+    if(r.success){toast("已刪除");if(editRow===row)resetForm();await load();}
+    else toast(r.error||"刪除失敗");
+  }catch(e){toast("連線失敗");}
+}
+
+/* ── 瀏覽 ── */
+function setMode(m){
+  mode=m;
+  ['treat','clinic','radar','mgmt'].forEach(k=>$("tab-"+k).classList.toggle('on',k===m));
+  if(m==='radar'){ show('view-radar'); initRadar(); return; }
+  show('view-home');
+  renderHome();
+}
+function renderHome(){
+  if(DATA.length===0&&mode!=='mgmt'){
+    $("home-body").innerHTML='<div class="empty">還沒有資料，點上方「新增療程報價」加入第一筆。</div>';
+    return;
+  }
+  if(mode==='treat') renderTreatList();
+  else if(mode==='clinic') renderClinicList();
+  else renderMgmt();
+}
+function renderTreatList(){
+  const map={};
+  DATA.forEach(r=>{map[r.treatment]=(map[r.treatment]||0)+1;});
+  const tones=[{bg:'var(--rose-deep)',c:'#fff'},{bg:'var(--sage-soft)',c:'#5f6651'},{bg:'#EBDADE',c:'#6f5358'}];
+  $("home-body").innerHTML=`<div class="chips">${Object.keys(map).map((t,i)=>{
+    const tone=tones[i%tones.length];
+    return `<button class="chip" style="background:${tone.bg};color:${tone.c};" onclick="openCompare('${esc(t)}')">${t}<span class="cnt">${map[t]} 家</span></button>`;
+  }).join("")}</div>`;
+}
+function renderClinicList(){
+  const map={};
+  DATA.forEach(r=>{if(!map[r.clinic])map[r.clinic]={area:r.area||'',cnt:0};map[r.clinic].cnt++;});
+  $("home-body").innerHTML=Object.keys(map).map(c=>{
+    const m=map[c];
+    return `<div class="clinic-row" onclick="openClinic('${esc(c)}')">
+      <div><div class="nm">${c}</div><div class="meta">${m.cnt} 項療程${m.area?' · '+m.area:''}</div></div>
+      <div class="arr">›</div></div>`;
+  }).join("");
+}
+function renderMgmt(){
+  if(DATA.length===0){$("home-body").innerHTML='<div class="empty">還沒有資料</div>';return;}
+  $("home-body").innerHTML=`<div class="mgmt-list"><p class="mgmt-title">共 ${DATA.length} 筆資料</p>${
+    DATA.map(r=>{
+      const avg=avgOf(r);
+      return `<div class="mgmt-row">
+        <div class="mr-nm">${r.clinic} · ${r.treatment}</div>
+        <div class="mr-sub">${r.machine||''} ${r.area?'· '+r.area:''}</div>
+        <div class="mr-sub">單堂體驗 ${fmt(r.single)}${r.times?` · 均價 ${fmt(avg)}（${r.times}堂）`:''}</div>
+        <div class="mr-acts">
+          <button class="btn-edit" onclick="startEdit(${r.row})">✏ 編輯</button>
+          <button class="btn-del" onclick="del(${r.row})">✕ 刪除</button>
+        </div></div>`;
+    }).join("")}</div>`;
+}
+
+/* ── 比價尺 ── */
+function openCompare(t){
+  curTreatment=t; $("cmp-title").textContent=t;
+  show('view-compare'); renderRuler();
+}
+function setSort(k){
+  sortKey=k;
+  $("srt-avg").classList.toggle('on',k==='avg');
+  $("srt-single").classList.toggle('on',k==='single');
+  renderRuler();
+}
+function renderRuler(){
+  let rows=DATA.filter(r=>r.treatment===curTreatment).map(r=>({...r,avg:avgOf(r)}));
+  rows.sort((a,b)=>a[sortKey]-b[sortKey]);
+  const vals=rows.map(r=>r[sortKey]);
+  const min=Math.min(...vals),max=Math.max(...vals);
+  $("ruler").innerHTML=rows.map(r=>{
+    const v=r[sortKey],w=Math.round(28+((v-min)/((max-min)||1))*57),low=v===min;
+    const other=sortKey==='avg'?`單堂體驗 ${fmt(r.single)}`:`均價 ${fmt(r.avg)}`;
+    return `<div class="rule">
+      <div class="rhead"><span class="rnm">${r.clinic}${low?'<span class="badge">最值得</span>':''}</span><span class="rmc">${r.machine||''}</span></div>
+      <div class="barwrap"><div class="bar${low?' low':''}" style="width:${w}%"></div><span class="rprice${low?' low':''}">${fmt(v)}</span></div>
+      <div class="rnote">${other}${r.note?' · '+r.note:''}</div>
+    </div>`;
+  }).join("");
+}
+
+/* ── 診所詳情 ── */
+function openClinic(c){
+  const rows=DATA.filter(r=>r.clinic===c);
+  $("cl-name").textContent=c;
+  const area=(rows.find(r=>r.area)||{}).area||'';
+  $("cl-loc").textContent=`${area?'📍 '+area+' · ':''}共 ${rows.length} 項療程`;
+  $("cl-treats").innerHTML=rows.map(r=>{
+    const avg=avgOf(r);
+    const hasStars=(r.s_book||r.s_vip||r.s_dist||r.s_staff);
+    return `<div class="treat-card">
+      <div class="top"><span class="tn">${r.treatment}</span><span class="tm">${r.machine||''}</span></div>
+      ${r.note?`<p class="tnote">${r.note}</p>`:''}
+      <div class="prices">
+        <div class="pitem"><p class="lab">單堂體驗價</p><p class="val">${fmt(r.single)}</p></div>
+        <div class="pitem"><p class="lab">多堂${r.times?`(${r.times}堂)`:''}</p><p class="val">${fmt(r.multi)}</p></div>
+        <div class="pitem"><p class="lab">均價</p><p class="val avg">${fmt(avg)}</p></div>
+      </div>
+      ${hasStars?`<div class="star-row">
+        ${r.s_book?`<div class="star-item"><p class="slab">好約程度</p><p class="stars">${stars(r.s_book)}</p></div>`:''}
+        ${r.s_vip?`<div class="star-item"><p class="slab">尊榮感</p><p class="stars">${stars(r.s_vip)}</p></div>`:''}
+        ${r.s_dist?`<div class="star-item"><p class="slab">距離方便</p><p class="stars">${stars(r.s_dist)}</p></div>`:''}
+        ${r.s_staff?`<div class="star-item"><p class="slab">人員親切</p><p class="stars">${stars(r.s_staff)}</p></div>`:''}
+      </div>`:''}
+    </div>`;
+  }).join("");
+  $("cl-treats").insertAdjacentHTML('beforeend',`
+    <button onclick="openAddFromClinic('${esc(c)}')"
+      style="width:100%;margin-top:4px;padding:13px;border-radius:16px;border:1.5px dashed var(--rose-soft);
+      background:transparent;color:var(--rose-deep);font-size:15px;font-family:inherit;cursor:pointer;">
+      ＋ 新增療程到此診所
+    </button>`);
+  show('view-clinic');
+}
+
+/* ── 雷達評比 ── */
+function initRadar(){
+  const treats=[...new Set(DATA.map(r=>r.treatment))];
+  const sel=$("radar-treat-sel");
+  sel.innerHTML=treats.map(t=>`<option value="${esc(t)}">${t}</option>`).join("");
+  if(!radarTreat||!treats.includes(radarTreat)) radarTreat=treats[0]||'';
+  sel.value=radarTreat;
+  radarActive=[];
+  renderRadarPills();
+  renderRadarChart();
+  initCalcSelectors();
+}
+function onRadarTreatChange(){
+  radarTreat=$("radar-treat-sel").value;
+  radarActive=[];
+  renderRadarPills();
+  renderRadarChart();
+  initCalcSelectors();
+}
+function renderRadarPills(){
+  const clinics=[...new Set(DATA.filter(r=>r.treatment===radarTreat).map(r=>r.clinic))];
+  $("radar-pills").innerHTML=clinics.map(c=>
+    `<button class="rpill${radarActive.includes(c)?' on':''}" onclick="toggleRadar('${esc(c)}')">${c}</button>`
+  ).join("");
+}
+function toggleRadar(c){
+  if(radarActive.includes(c)){
+    if(radarActive.length===1) return;
+    radarActive=radarActive.filter(x=>x!==c);
+  } else {
+    radarActive=[...radarActive,c].slice(-3);
+  }
+  renderRadarPills();
+  renderRadarChart();
+}
+
+function radarScore(r, allRows){
+  // 價格：反算，最低得100
+  const avgVals=allRows.map(x=>avgOf(x)).filter(v=>v>0);
+  const singleVals=allRows.map(x=>x.single).filter(v=>v>0);
+  const minAvg=Math.min(...avgVals), maxAvg=Math.max(...avgVals);
+  const minS=Math.min(...singleVals), maxS=Math.max(...singleVals);
+  const scoreAvg=maxAvg===minAvg?80:Math.round(100-((avgOf(r)-minAvg)/(maxAvg-minAvg))*80);
+  const scoreSingle=maxS===minS?80:Math.round(100-((r.single-minS)/(maxS-minS))*80);
+  return [
+    scoreSingle,
+    scoreAvg,
+    (r.s_book||0)*20,
+    (r.s_vip||0)*20,
+    (r.s_dist||0)*20,
+    (r.s_staff||0)*20
+  ];
+}
+
+function renderRadarChart(){
+  const allRows=DATA.filter(r=>r.treatment===radarTreat);
+  if(_radarChart){_radarChart.destroy();_radarChart=null;}
+  if(radarActive.length===0){
+    $("radar-legend").innerHTML='<p style="font-size:13px;color:var(--muted);">請點上方診所名稱開始比較</p>';
+    return;
+  }
+  const datasets=radarActive.map((c,i)=>{
+    const r=allRows.find(x=>x.clinic===c);
+    const sc=r?radarScore(r,allRows):[0,0,0,0,0,0];
+    return {label:c,data:sc,borderColor:RADAR_COLORS[i],backgroundColor:RADAR_FILLS[i],borderWidth:2,pointBackgroundColor:RADAR_COLORS[i],pointRadius:4,pointHoverRadius:6};
+  });
+  _radarChart=new Chart($("radar-chart"),{
+    type:'radar',
+    data:{
+      labels:['單堂體驗價格','平均價格','好約程度','尊榮感','距離方便','人員親切'],
+      datasets
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{
+        min:0,max:100,
+        ticks:{display:false,stepSize:20},
+        grid:{color:'rgba(158,99,115,0.15)'},
+        pointLabels:{font:{size:11,family:'Huninn'},color:'#9A8B8E'},
+        angleLines:{color:'rgba(158,99,115,0.15)'}
+      }}
+    }
+  });
+  $("radar-legend").innerHTML=radarActive.map((c,i)=>
+    `<div class="rleg"><div class="rleg-dot" style="background:${RADAR_COLORS[i]}"></div>${c}</div>`
+  ).join("");
+}
+
+/* ── 價格試算購物車 ── */
+let cart = []; // [{treat, clinic, plan, times, price, desc}]
+
+function initCalcSelectors(){
+  const treats=[...new Set(DATA.map(r=>r.treatment))];
+  $("calc-treat-sel").innerHTML=`<option value="">選療程</option>`+treats.map(t=>`<option value="${esc(t)}">${t}</option>`).join("");
+  $("calc-clinic-sel").innerHTML=`<option value="">選診所</option>`;
+  $("calc-plan-sel").innerHTML=`<option value="">先選療程和診所</option>`;
+}
+
+function onCalcTreatChange(){
+  const treat=$("calc-treat-sel").value;
+  if(!treat){$("calc-clinic-sel").innerHTML=`<option value="">選診所</option>`;$("calc-plan-sel").innerHTML=`<option value="">先選療程和診所</option>`;return;}
+  const clinics=[...new Set(DATA.filter(r=>r.treatment===treat).map(r=>r.clinic))];
+  $("calc-clinic-sel").innerHTML=`<option value="">選診所</option>`+clinics.map(c=>`<option value="${esc(c)}">${c}</option>`).join("");
+  $("calc-plan-sel").innerHTML=`<option value="">再選診所</option>`;
+}
+
+function onCalcClinicChange(){
+  const treat=$("calc-treat-sel").value;
+  const clinic=$("calc-clinic-sel").value;
+  if(!treat||!clinic){$("calc-plan-sel").innerHTML=`<option value="">先選療程和診所</option>`;return;}
+  const r=DATA.find(x=>x.treatment===treat&&x.clinic===clinic);
+  if(!r){return;}
+  const opts=[`<option value="">選方案</option>`,`<option value="single">單堂體驗價 ${fmt(r.single)}</option>`];
+  if(r.multi&&r.times) opts.push(`<option value="multi">多堂套組 ${fmt(r.multi)}（${r.times}堂）</option>`);
+  $("calc-plan-sel").innerHTML=opts.join("");
+}
+
+function addToCart(){
+  const treat=$("calc-treat-sel").value;
+  const clinic=$("calc-clinic-sel").value;
+  const plan=$("calc-plan-sel").value;
+  const times=parseInt($("calc-times").value)||0;
+  if(!treat||!clinic||!plan||!times){toast("請選齊療程、診所、方案，並填堂數");return;}
+  const r=DATA.find(x=>x.treatment===treat&&x.clinic===clinic);
+  if(!r) return;
+  let price=0, desc='';
+  if(plan==='single'){
+    price=r.single*times;
+    desc=`${treat} · ${clinic} 單堂×${times}堂`;
+  } else {
+    const sets=Math.ceil(times/r.times);
+    price=r.multi*sets;
+    desc=`${treat} · ${clinic} 套組×${sets}組(${sets*r.times}堂)`;
+  }
+  cart.push({treat,clinic,plan,times,price,desc});
+  renderCart();
+  // 清空選擇
+  $("calc-plan-sel").value='';
+  $("calc-times").value='';
+}
+
+function removeCart(i){
+  cart.splice(i,1);
+  renderCart();
+}
+
+function clearCart(){
+  cart=[];
+  renderCart();
+}
+
+function renderCart(){
+  const list=$("cart-list");
+  const totalBox=$("cart-total-box");
+  if(cart.length===0){
+    list.innerHTML='';
+    totalBox.classList.add('hidden');
+    return;
+  }
+  list.innerHTML=cart.map((item,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;
+      background:var(--card);border:0.5px solid var(--hair);border-radius:12px;
+      padding:10px 12px;margin-bottom:7px;">
+      <div>
+        <div style="font-size:14px;color:var(--ink);">${item.desc}</div>
+        <div style="font-size:13px;color:var(--rose-deep);margin-top:2px;">${fmt(item.price)}</div>
+      </div>
+      <button onclick="removeCart(${i})" style="font-size:18px;color:var(--muted);background:transparent;border:none;cursor:pointer;padding:0 4px;">×</button>
+    </div>`).join("");
+  const grand=cart.reduce((s,x)=>s+x.price,0);
+  $("cart-grand-total").textContent=fmt(grand);
+  $("cart-summary").innerHTML=cart.map(x=>`${x.desc}　${fmt(x.price)}`).join("<br>");
+  totalBox.classList.remove('hidden');
+}
+
+function show(v){
+  ['view-home','view-compare','view-clinic','view-radar'].forEach(id=>$(id).classList.add('hidden'));
+  $(v).classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function goHome(){
+  show('view-home');
+  ['treat','clinic','radar','mgmt'].forEach(k=>$("tab-"+k).classList.toggle('on',k===mode));
+}
+
+initStarPickers();
+load();
+</script>
+</body>
+</html>
