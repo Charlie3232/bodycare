@@ -163,7 +163,7 @@ select:focus{border-color:var(--rose-deep);}
       <div>
         <label>診所名稱 *</label>
         <div class="input-wrap">
-          <input id="f-clinic" autocomplete="off" oninput="suggest('f-clinic','clinic-dd',getMemory('clinics'))" onfocus="suggest('f-clinic','clinic-dd',getMemory('clinics'))" onblur="hideDd('clinic-dd')">
+          <input id="f-clinic" autocomplete="off" oninput="suggest('f-clinic','clinic-dd',getMemory('clinics'))" onfocus="suggest('f-clinic','clinic-dd',getMemory('clinics'))" onblur="hideDd('clinic-dd');autoFillClinic(this.value.trim())">
           <div class="dropdown hidden" id="clinic-dd"></div>
         </div>
       </div>
@@ -321,14 +321,15 @@ const avgOf = r => r.times > 0 ? Math.round(r.multi / r.times) : (r.multi||0);
 const esc = s => String(s).replace(/'/g,"\\'");
 const stars = n => '★'.repeat(n||0) + '☆'.repeat(5-(n||0));
 
-/* ── 記憶下拉 ── */
-function getMemory(key){ return JSON.parse(localStorage.getItem('mem_'+key)||'[]'); }
-function saveMemory(key,val){
-  if(!val) return;
-  let arr = getMemory(key);
-  arr = [val,...arr.filter(x=>x!==val)].slice(0,30);
-  localStorage.setItem('mem_'+key, JSON.stringify(arr));
+/* ── 記憶下拉（從 DATA 讀，不用 localStorage，換瀏覽器也不會不見）── */
+function getMemory(key){
+  if(!DATA.length) return [];
+  if(key==='clinics')    return [...new Set(DATA.map(r=>r.clinic).filter(Boolean))];
+  if(key==='treatments') return [...new Set(DATA.map(r=>r.treatment).filter(Boolean))];
+  if(key==='machines')   return [...new Set(DATA.map(r=>r.machine).filter(Boolean))];
+  return [];
 }
+function saveMemory(){ /* 不需要了，直接從 DATA 讀 */ }
 function suggest(inputId, ddId, list){
   const v = $(inputId).value.trim().toLowerCase();
   const filtered = v ? list.filter(x=>x.toLowerCase().includes(v)) : list;
@@ -341,8 +342,22 @@ function pick(inputId, ddId, val){
   $(inputId).value = val;
   $(ddId).classList.add('hidden');
   if(inputId==='f-multi'||inputId==='f-times') updAvg();
+  // 選完診所後自動帶入地區＋評分
+  if(inputId==='f-clinic') autoFillClinic(val);
 }
 function hideDd(ddId){ setTimeout(()=>$(ddId).classList.add('hidden'),150); }
+
+/* ── 選診所後自動帶地區＋評分 ── */
+function autoFillClinic(clinicName){
+  // 找這家診所的任意一筆資料
+  const r = DATA.find(x=>x.clinic===clinicName);
+  if(!r) return;
+  if(r.area) $("f-area").value = r.area;
+  setStars('book', r.s_book||0);
+  setStars('vip',  r.s_vip||0);
+  setStars('dist', r.s_dist||0);
+  setStars('staff',r.s_staff||0);
+}
 
 /* ── 星星選擇器 ── */
 const starVals = {book:0, vip:0, dist:0, staff:0};
@@ -455,9 +470,9 @@ async function save(){
   try{
     const r=await post(p);
     if(r.success){
-      toast(editRow?"已更新":"已新增");
-      saveMemory('clinics',p.clinic); saveMemory('treatments',p.treatment); saveMemory('machines',p.machine);
-      const back=fromClinic;
+      const wasEdit = !!editRow;
+      const back = fromClinic;
+      toast(wasEdit?"已更新":"已新增");
       resetForm(); formOpen=true; toggleForm();
       await load();
       if(back) openClinic(back);
