@@ -442,6 +442,8 @@ function openAddFromClinic(clinicName){
   $("f-clinic").style.background='var(--bg)';
   $("f-clinic").style.color='var(--muted)';
   $("form-banner").textContent=`新增療程到：${clinicName}`;
+  // 自動帶入地區＋評分
+  autoFillClinic(clinicName);
   show('view-home');
   if(!formOpen) toggleForm();
   window.scrollTo({top:0,behavior:'smooth'});
