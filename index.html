@@ -349,14 +349,18 @@ function hideDd(ddId){ setTimeout(()=>$(ddId).classList.add('hidden'),150); }
 
 /* ── 選診所後自動帶地區＋評分 ── */
 function autoFillClinic(clinicName){
-  // 找這家診所的任意一筆資料
-  const r = DATA.find(x=>x.clinic===clinicName);
+  if(!clinicName) return;
+  // 找這家診所的任意一筆資料（比對去除前後空白）
+  const r = DATA.find(x=>x.clinic && x.clinic.trim()===clinicName.trim());
   if(!r) return;
   if(r.area) $("f-area").value = r.area;
-  setStars('book', r.s_book||0);
-  setStars('vip',  r.s_vip||0);
-  setStars('dist', r.s_dist||0);
-  setStars('staff',r.s_staff||0);
+  // 評分：找這家診所有填評分的那筆
+  const rated = DATA.find(x=>x.clinic && x.clinic.trim()===clinicName.trim() && (x.s_book||x.s_vip||x.s_dist||x.s_staff));
+  const src = rated || r;
+  setStars('book', src.s_book||0);
+  setStars('vip',  src.s_vip||0);
+  setStars('dist', src.s_dist||0);
+  setStars('staff',src.s_staff||0);
 }
 
 /* ── 星星選擇器 ── */
@@ -436,16 +440,17 @@ function startEdit(row){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function openAddFromClinic(clinicName){
-  fromClinic=clinicName; resetForm();
+  fromClinic=clinicName;
+  resetForm();
   $("f-clinic").value=clinicName;
   $("f-clinic").readOnly=true;
   $("f-clinic").style.background='var(--bg)';
   $("f-clinic").style.color='var(--muted)';
   $("form-banner").textContent=`新增療程到：${clinicName}`;
-  // 自動帶入地區＋評分
-  autoFillClinic(clinicName);
   show('view-home');
   if(!formOpen) toggleForm();
+  // show/toggleForm 之後再帶入，確保 DOM 已穩定
+  setTimeout(()=>autoFillClinic(clinicName), 50);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
